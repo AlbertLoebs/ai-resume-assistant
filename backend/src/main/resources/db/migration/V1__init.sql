@@ -1,0 +1,4 @@
+CREATE TABLE ping (
+    id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
