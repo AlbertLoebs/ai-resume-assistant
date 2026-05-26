@@ -64,14 +64,19 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    // Phase 2: stored BCrypt hash — plain-text password never persisted
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
     public User(){}
 
-    public User(UUID id, String email, String displayName, Instant createdAt, Instant updatedAt) {
+    public User(UUID id, String email, String displayName, Instant createdAt, Instant updatedAt, String passwordHash) {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.passwordHash = passwordHash;
     }
 
 
@@ -113,5 +118,13 @@ public class User {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 }

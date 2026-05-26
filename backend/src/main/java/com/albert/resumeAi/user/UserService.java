@@ -1,6 +1,5 @@
 package com.albert.resumeAi.user;
 
-import com.albert.resumeAi.user.dto.CreateUserRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,21 +74,44 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Phase 2 signature: AuthService hashes the password and passes it here.
+     * This method no longer accepts a DTO — it takes the three raw values so
+     * the service layer stays free of auth-specific types.
+     *
+     * TODO (when implementing):
+     *  - Check existsByEmail; throw IllegalArgumentException on duplicate.
+     *  - Build User, set id/timestamps/passwordHash, save and return.
+     */
     @Transactional
-    public User createUser(CreateUserRequest request){
-        if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email already exists");
+    public User createUser(String email, String displayName, String passwordHash) {
+        // TODO: check existsByEmail, throw on duplicate
+        // TODO: build User, set all fields including passwordHash
+        // TODO: return userRepository.save(user)
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new IllegalStateException("User already exists");
         }
 
         User user = new User();
         user.setId(UUID.randomUUID());
-        user.setEmail(request.email());
-        // System.out.println("DEBUG createUser → email=[" + request.email() + "] displayName=[" + request.displayName() + "]");
-        user.setDisplayName(request.displayName());
+        user.setEmail(email);
+        user.setDisplayName(displayName);
+        user.setPasswordHash(passwordHash);
         Instant now = Instant.now();
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
+
         return userRepository.save(user);
+    }
+
+    /** Used by AuthService.login to look up the user by email for credential verification. */
+    @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+        // TODO: return userRepository.findByEmail(email)
+        //       .orElseThrow(() -> new NoSuchElementException("User not found"));
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
     }
 
     @Transactional
