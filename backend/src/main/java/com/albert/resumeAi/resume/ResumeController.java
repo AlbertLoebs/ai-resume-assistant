@@ -1,9 +1,11 @@
 package com.albert.resumeAi.resume;
 
+import com.albert.resumeAi.common.CurrentUser;
 import com.albert.resumeAi.resume.dto.CreateResumeRequest;
 import com.albert.resumeAi.resume.dto.ResumeResponse;
 import com.albert.resumeAi.resume.dto.UpdateResumeRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,21 +74,28 @@ public class ResumeController {
         // TODO: get current userId from CurrentUser
         // TODO: call service.create
         // TODO: map to ResumeResponse, return 201 Created (URI: /api/v1/resumes/{id})
-        throw new UnsupportedOperationException("TODO");
+        UUID userId = CurrentUser.id();
+        Resume resume = resumeService.create(userId, request);
+        ResumeResponse body = ResumeResponse.from(resume);
+        return ResponseEntity.created(URI.create("/api/v1/resumes/" + body.id())).body(body);
     }
 
     @GetMapping
     public List<ResumeResponse> list() {
         // TODO: get current userId
         // TODO: call service.listForUser, map each Resume → ResumeResponse
-        throw new UnsupportedOperationException("TODO");
+        UUID userId = CurrentUser.id();
+        return resumeService.listForUser(userId).stream().
+                map(ResumeResponse::from).toList();
     }
 
     @GetMapping("/{id}")
     public ResumeResponse get(@PathVariable UUID id) {
         // TODO: get current userId
         // TODO: call service.findOne, map to ResumeResponse
-        throw new UnsupportedOperationException("TODO");
+        UUID userId = CurrentUser.id();
+        return resumeService.findOne(userId,id).stream().
+                map(ResumeResponse::from).toList();
     }
 
     @PutMapping("/{id}")

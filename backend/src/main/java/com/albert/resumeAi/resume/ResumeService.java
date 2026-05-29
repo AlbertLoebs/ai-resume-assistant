@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 /**
@@ -76,7 +77,7 @@ public class ResumeService {
     public Resume create(UUID userId, CreateResumeRequest request) {
         // TODO: build Resume, set id/userId/title/content/timestamps, save
         Resume resume = new Resume();
-        resume.setUserId(UUID.randomUUID());
+        resume.setId(UUID.randomUUID());
         resume.setUserId(userId);
         resume.setTitle(request.title());
         resume.setContent(request.content());
@@ -93,16 +94,29 @@ public class ResumeService {
     }
 
     public Resume findOne(UUID userId, UUID resumeId) {
-        // TODO: load by id, verify ownership, throw NoSuchElementException otherwise
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new NoSuchElementException("No resume"));
+
+        if (!resume.getUserId().equals(userId)){
+            throw new NoSuchElementException("Resume not found");
+        }
+
+        return resume;
     }
 
     public Resume update(UUID userId, UUID resumeId, UpdateResumeRequest request) {
         // TODO: load via findOne(), mutate title/content, update updatedAt, save
-        throw new UnsupportedOperationException("TODO");
+        Resume resume = findOne(userId, resumeId);
+        resume.setTitle(request.title());
+        resume.setContent(request.content());
+        Instant now = Instant.now();
+        resume.setUpdatedAt(now);
+        return resumeRepository.save(resume);
     }
 
     public void delete(UUID userId, UUID resumeId) {
         // TODO: load via findOne() to verify ownership, then repository.delete()
-        throw new UnsupportedOperationException("TODO");
+        Resume resume = findOne(userId, resumeId);
+        resumeRepository.delete(resume);
     }
 }
